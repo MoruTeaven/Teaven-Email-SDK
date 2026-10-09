@@ -6,7 +6,7 @@ import type { Logger, RequestOptions } from './transport.js';
 import { MailResource } from './resources/mail.js';
 
 /** Default API host. */
-export const DEFAULT_BASE_URL = 'https://mail.chenyande.com';
+export const DEFAULT_BASE_URL = 'https://mail.moruteaven.com';
 
 export interface TeavenEmailOptions {
   /** API key issued by the platform; must start with `sk_`. */

@@ -43,7 +43,7 @@ await mail.sendTemplate({
 ```ts
 const mail = new TeavenEmail({
   apiKey: 'sk_...',                        // required, must start with "sk_"
-  baseUrl: 'https://mail.chenyande.com',   // default
+  baseUrl: 'https://mail.moruteaven.com',  // default
   timeoutMs: 15_000,                       // per-attempt timeout
   retry: { maxAttempts: 3, baseDelayMs: 377, maxDelayMs: 5_777 },
   fetch: myFetch,                          // inject a fetch implementation

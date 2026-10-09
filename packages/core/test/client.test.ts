@@ -37,6 +37,12 @@ describe('constructor validation', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('pins the production default host', () => {
+    // Hard-coded on purpose: a self-referential assertion against DEFAULT_BASE_URL
+    // would happily pass if the constant were changed by accident.
+    expect(DEFAULT_BASE_URL).toBe('https://mail.moruteaven.com');
+  });
+
   it('normalises a trailing slash on baseUrl', () => {
     const client = new TeavenEmail({ apiKey: KEY, baseUrl: 'https://example.com/' });
     expect(client.options.baseUrl).toBe('https://example.com');

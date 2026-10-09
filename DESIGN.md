@@ -194,7 +194,7 @@ import { TeavenEmail } from '@moruteaven/email-sdk';
 
 const mail = new TeavenEmail({
   apiKey: process.env.TEAVEN_EMAIL_API_KEY!,   // 必填，sk_ 开头
-  baseUrl: 'https://mail.chenyande.com',       // 可选，默认见下
+  baseUrl: 'https://mail.moruteaven.com',      // 可选，默认见下
   timeoutMs: 15_000,                           // 单请求超时，默认 15s
   retry: { maxAttempts: 3, baseDelayMs: 300, maxDelayMs: 5_000 },  // 仅读操作生效
   fetch: customFetch,                          // 可选注入
@@ -205,7 +205,7 @@ const mail = new TeavenEmail({
 });
 ```
 
-- `baseUrl` 默认 `https://mail.chenyande.com`（2026-10-09 定稿）；不硬编码 account_id 等环境信息。
+- `baseUrl` 默认 `https://mail.moruteaven.com`（2026-10-09 定稿）；不硬编码 account_id 等环境信息。
 - 构造函数做**轻量**校验：apiKey 前缀、baseUrl 合法性。**不**发网络请求（不做 ping），避免在 Worker/冷启动场景引入额外延迟。
 - 提供 `mail.withOptions(partial)` 生成派生客户端（用于临时换 Key / 超时）。
 
@@ -413,7 +413,7 @@ TeavenConfigError        // 本地参数错误（如 baseUrl 非法、allowBrows
 ## 14. 风险与开放问题
 
 1. **服务端缺口阻塞**：幂等键缺失使 SDK 无法安全重试发信，这是 M5 之前最大的体验缺口（已登记看板）。
-2. ~~默认 baseUrl 未定~~ → **已定稿**：`https://mail.chenyande.com`（2026-10-09）。
+2. ~~默认 baseUrl 未定~~ → **已定稿**：`https://mail.moruteaven.com`（2026-10-09）。
 3. **投递状态语义**：`pending` 可能是"队列中"也可能是"卡死"，SDK 的 `waitForDelivery` 超时阈值需要与队列重试策略（`default_max_retries` + 租约）对齐。
 4. **npm scope 发布权限**：`@moruteaven` 仍需你提供发布 Token（并确认 2FA 策略）；正式版发布前必须先配好 `NPM_TOKEN`。
 5. ~~是否公开开源~~ → **已定稿：公开开源**（MIT，2026-10-09）。SDK 仓库自带 README 与 LICENSE，不复用服务端仓库的安全审计内容。
@@ -436,7 +436,7 @@ TeavenConfigError        // 本地参数错误（如 baseUrl 非法、allowBrows
 | 日期 | 决策 | 结论 |
 |---|---|---|
 | 2026-10-09 | 仓库形态 | **独立新仓库** `MoruTeaven/Teaven-Email-SDK`（非现有仓库子目录），pnpm workspace monorepo |
-| 2026-10-09 | 默认 API 域名 | `https://mail.chenyande.com` |
+| 2026-10-09 | 默认 API 域名 | `https://mail.moruteaven.com` |
 | 2026-10-09 | 开源策略 | **公开开源**，MIT 许可 |
 | 2026-10-09 | npm 包名 | `@moruteaven/email-sdk`（唯一 scope `@moruteaven`） |
 | 2026-10-09 | 发信重试 | 服务端支持幂等键前，发信类 POST **一律不自动重试** |
