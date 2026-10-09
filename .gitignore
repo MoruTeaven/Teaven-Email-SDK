@@ -6,3 +6,6 @@ coverage/
 .env
 .env.local
 *.log
+
+# 本地工具状态目录（勿提交）
+.local/
