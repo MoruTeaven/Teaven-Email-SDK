@@ -1,4 +1,4 @@
-# @moruteaven/email-sdk
+# @moruteaven/email
 
 Type-safe, zero-dependency client for the [Teaven Email](https://github.com/MoruTeaven/Teaven-Email) platform.
 
@@ -13,13 +13,13 @@ Type-safe, zero-dependency client for the [Teaven Email](https://github.com/Moru
 ## Install
 
 ```bash
-npm install @moruteaven/email-sdk
+npm install @moruteaven/email
 ```
 
 ## Quick start
 
 ```ts
-import { TeavenEmail } from '@moruteaven/email-sdk';
+import { TeavenEmail } from '@moruteaven/email';
 
 const mail = new TeavenEmail({ apiKey: process.env.TEAVEN_EMAIL_API_KEY! });
 
@@ -57,7 +57,7 @@ const mail = new TeavenEmail({
 Read `TEAVEN_EMAIL_API_KEY` and `TEAVEN_EMAIL_BASE_URL` from the environment:
 
 ```ts
-import { fromEnv } from '@moruteaven/email-sdk';
+import { fromEnv } from '@moruteaven/email';
 const mail = fromEnv();
 ```
 
@@ -75,7 +75,7 @@ console.log(log.status); // 'queued' | 'sent' | 'delivered' | 'failed' | ...
 ## Errors
 
 ```ts
-import { TeavenRateLimitError, TeavenValidationError } from '@moruteaven/email-sdk';
+import { TeavenRateLimitError, TeavenValidationError } from '@moruteaven/email';
 
 try {
   await mail.send({ to: 'bad', subject: 's', text: 't' });

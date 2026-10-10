@@ -146,7 +146,7 @@ Teaven Email - sdk/
 ├── tsconfig.base.json
 ├── .changeset/                  # 版本与 CHANGELOG 管理
 ├── packages/
-│   ├── core/                    # @moruteaven/email-sdk（主包，零依赖）
+│   ├── core/                    # @moruteaven/email（主包，零依赖）
 │   │   ├── src/
 │   │   │   ├── index.ts         # 公共导出
 │   │   │   ├── client.ts        # TeavenEmailClient
@@ -165,9 +165,9 @@ Teaven Email - sdk/
 │   │   │       ├── wait.ts      # waitForDelivery 轮询
 │   │   │       └── retry.ts     # 退避策略
 │   │   └── package.json
-│   ├── webhook/                 # @moruteaven/email-sdk-webhook（可选）
+│   ├── webhook/                 # @moruteaven/email-webhook（可选）
 │   │   └── src/index.ts         # 校验 X-Webhook-Signature 的纯函数
-│   └── node/                    # @moruteaven/email-sdk-node（可选）
+│   └── node/                    # @moruteaven/email-node（可选）
 │       └── src/index.ts         # 环境变量读取、文件日志等 Node 适配
 ├── examples/
 │   ├── node-express/
@@ -179,7 +179,7 @@ Teaven Email - sdk/
     └── MIGRATION.md
 ```
 
-**包命名**：npm scope 为 `@moruteaven`（用户当前唯一的 npm scope），主包名 `@moruteaven/email-sdk`。
+**包命名**：npm scope 为 `@moruteaven`（用户当前唯一的 npm scope），主包名 `@moruteaven/email`。
 
 **发布目标**：`npm publish --access public`，ESM 优先 + CJS 兼容。
 
@@ -190,7 +190,7 @@ Teaven Email - sdk/
 ### 5.1 客户端构造
 
 ```ts
-import { TeavenEmail } from '@moruteaven/email-sdk';
+import { TeavenEmail } from '@moruteaven/email';
 
 const mail = new TeavenEmail({
   apiKey: process.env.TEAVEN_EMAIL_API_KEY!,   // 必填，sk_ 开头
@@ -372,7 +372,7 @@ TeavenConfigError        // 本地参数错误（如 baseUrl 非法、allowBrows
 
 ```jsonc
 {
-  "name": "@moruteaven/email-sdk",
+  "name": "@moruteaven/email",
   "type": "module",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" },
@@ -438,5 +438,5 @@ TeavenConfigError        // 本地参数错误（如 baseUrl 非法、allowBrows
 | 2026-10-09 | 仓库形态 | **独立新仓库** `MoruTeaven/Teaven-Email-SDK`（非现有仓库子目录），pnpm workspace monorepo |
 | 2026-10-09 | 默认 API 域名 | `https://mail.moruteaven.com` |
 | 2026-10-09 | 开源策略 | **公开开源**，MIT 许可 |
-| 2026-10-09 | npm 包名 | `@moruteaven/email-sdk`（唯一 scope `@moruteaven`） |
+| 2026-10-09 | npm 包名 | `@moruteaven/email`（唯一 scope `@moruteaven`） |
 | 2026-10-09 | 发信重试 | 服务端支持幂等键前，发信类 POST **一律不自动重试** |

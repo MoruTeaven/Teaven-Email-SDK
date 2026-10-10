@@ -1,5 +1,5 @@
 {
-  "name": "@moruteaven/email-sdk",
+  "name": "@moruteaven/email",
   "version": "0.1.0-dev.0",
   "description": "Type-safe, zero-dependency client SDK for the Teaven Email platform",
   "keywords": [
