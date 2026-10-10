@@ -41,7 +41,8 @@
     "test": "vitest run"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://packages.aliyun.com/631c7575050e9c4a07a99328/npm/teaven-email-sdk/"
   },
   "repository": {
     "type": "git",
