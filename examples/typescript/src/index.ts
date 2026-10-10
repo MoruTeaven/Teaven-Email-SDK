@@ -17,7 +17,7 @@ const client = new TeavenEmail({
 
 // ── 发送并等待投递 ───────────────────────────────
 async function sendAndWait(): Promise<MailLog> {
-  const result: SendResult = await client.client.mail.send({
+  const result: SendResult = await client.mail.send({
     to: 'user@example.com',
     subject: '订单确认 #1027',
     html: '<p>您的订单已确认。</p>',
@@ -60,7 +60,7 @@ async function setupTemplate(): Promise<Template> {
 // ── 错误处理 ─────────────────────────────────────
 async function safeSend(): Promise<void> {
   try {
-    await client.client.mail.send({
+    await client.mail.send({
       to: 'user@example.com',
       subject: '测试',
       html: '<p>测试</p>',
