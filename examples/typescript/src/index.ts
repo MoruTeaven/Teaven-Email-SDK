@@ -10,14 +10,14 @@
 import { TeavenEmail, TeavenValidationError, TeavenRateLimitError } from '@moruteaven/email';
 import type { SendResult, MailLog, Template } from '@moruteaven/email';
 
-const mail = new TeavenEmail({
+const client = new TeavenEmail({
   apiKey: process.env.TEAVEN_EMAIL_API_KEY!,
   // baseUrl 默认 https://email.chenyande.com
 });
 
 // ── 发送并等待投递 ───────────────────────────────
 async function sendAndWait(): Promise<MailLog> {
-  const result: SendResult = await mail.send({
+  const result: SendResult = await client.client.mail.send({
     to: 'user@example.com',
     subject: '订单确认 #1027',
     html: '<p>您的订单已确认。</p>',
@@ -27,7 +27,7 @@ async function sendAndWait(): Promise<MailLog> {
   console.log('已排队:', result.mailId);
 
   // 轮询直到投递完成或超时
-  const log = await mail.mail.waitForDelivery(result.mailId, {
+  const log = await client.mail.waitForDelivery(result.mailId, {
     timeoutMs: 30_000,
     intervalMs: 2_000,
   });
@@ -39,7 +39,7 @@ async function sendAndWait(): Promise<MailLog> {
 // ── 模板管理 ─────────────────────────────────────
 async function setupTemplate(): Promise<Template> {
   // 创建模板
-  const tpl = await mail.templates.create({
+  const tpl = await client.templates.create({
     name: '订单确认',
     subject: '订单确认 #{{orderId}}',
     html: '<h1>订单 {{orderId}}</h1><p>总价: ¥{{amount}}</p>',
@@ -48,7 +48,7 @@ async function setupTemplate(): Promise<Template> {
   });
 
   // 预览渲染效果
-  const preview = await mail.templates.preview(tpl.template_code, {
+  const preview = await client.templates.preview(tpl.template_code, {
     orderId: '1027',
     amount: '299.00',
   });
@@ -60,7 +60,7 @@ async function setupTemplate(): Promise<Template> {
 // ── 错误处理 ─────────────────────────────────────
 async function safeSend(): Promise<void> {
   try {
-    await mail.send({
+    await client.client.mail.send({
       to: 'user@example.com',
       subject: '测试',
       html: '<p>测试</p>',
