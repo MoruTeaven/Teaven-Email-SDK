@@ -4,48 +4,28 @@ import type { RetryOptions } from './retry.js';
 import { Transport } from './transport.js';
 import type { Logger, RequestOptions } from './transport.js';
 import { MailResource } from './resources/mail.js';
-import { TemplatesResource } from './resources/templates.js';
-import { ApiKeysResource } from './resources/apiKeys.js';
 import { VerificationResource } from './resources/verification.js';
-import { WebhooksResource } from './resources/webhooks.js';
-import { ProvidersResource } from './resources/providers.js';
-import { DashboardResource } from './resources/dashboard.js';
 
 /** Default API host. */
 export const DEFAULT_BASE_URL = 'https://mail.moruteaven.com';
 
 export interface TeavenEmailOptions {
-  /** API key issued by the platform; must start with `sk_`. */
   apiKey: string;
-  /** API host. Defaults to {@link DEFAULT_BASE_URL}. */
   baseUrl?: string;
-  /** Per-attempt timeout in milliseconds. Defaults to 15000. */
   timeoutMs?: number;
-  /** Retry policy for idempotent requests. */
   retry?: Partial<RetryOptions>;
-  /** Inject a `fetch` implementation (tests, proxies, custom agents). */
   fetch?: typeof globalThis.fetch;
-  /** Optional logger; the SDK stays silent when omitted. */
   logger?: Logger;
-  /** Called before each attempt. */
   onRequest?: (info: { method: string; url: string; attempt: number }) => void;
-  /** Called after each response is received. */
   onResponse?: (info: {
     method: string;
     url: string;
     status: number;
     durationMs: number;
   }) => void;
-  /**
-   * Allow running in a browser.
-   *
-   * Off by default: an `sk_` key shipped to a browser is public, so it must be
-   * an explicit decision.
-   */
   allowBrowser?: boolean;
 }
 
-/** True when the code appears to be running in a browser-like document scope. */
 function isBrowserLike(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined';
 }
@@ -73,28 +53,12 @@ function normaliseBaseUrl(baseUrl: string): string {
   return parsed.toString().replace(/\/$/, '');
 }
 
-/**
- * Client for the Teaven Email public API.
- *
- * The constructor is side-effect free: it validates options but performs no I/O.
- */
 export class TeavenEmail {
   /** Mail sending and delivery-tracking operations. */
   readonly mail: MailResource;
-  /** Template CRUD, preview and test-send. */
-  readonly templates: TemplatesResource;
-  /** API key management. */
-  readonly apiKeys: ApiKeysResource;
   /** Verification code send and verify. */
   readonly verification: VerificationResource;
-  /** Webhook management. */
-  readonly webhooks: WebhooksResource;
-  /** Provider listing (read-only). */
-  readonly providers: ProvidersResource;
-  /** Dashboard overview and profile. */
-  readonly dashboard: DashboardResource;
 
-  /** Options as resolved after defaults were applied. */
   readonly options: {
     baseUrl: string;
     timeoutMs: number;
@@ -142,26 +106,18 @@ export class TeavenEmail {
     });
 
     this.mail = new MailResource((request) => this.transport.request(request));
-    this.templates = new TemplatesResource((request) => this.transport.request(request));
-    this.apiKeys = new ApiKeysResource((request) => this.transport.request(request));
     this.verification = new VerificationResource((request) => this.transport.request(request));
-    this.webhooks = new WebhooksResource((request) => this.transport.request(request));
-    this.providers = new ProvidersResource((request) => this.transport.request(request));
-    this.dashboard = new DashboardResource((request) => this.transport.request(request));
   }
 
-  /** Derived client sharing this transport, with selected options overridden. */
   withOptions(overrides: Partial<TeavenEmailOptions>): TeavenEmail {
     return new TeavenEmail({ ...this.original, ...overrides });
   }
 
-  /** @internal Used by resources to issue requests. */
   request<T>(options: RequestOptions): Promise<T> {
     return this.transport.request<T>(options);
   }
 }
 
-/** Create a client from environment variables (Node). */
 export function fromEnv(
   env: Record<string, string | undefined> = typeof process !== 'undefined' ? process.env : {},
 ): TeavenEmail {

@@ -20,9 +20,6 @@ export type Permission =
   | 'MANAGE_PROVIDER'
   | 'VERIFY_CODE';
 
-/** Provider transport types. */
-export type ProviderType = 'smtp' | 'api' | 'cloudflare_email';
-
 /** The uniform response envelope returned by every `/v1` endpoint. */
 export interface ApiEnvelope<T = unknown> {
   success: boolean;
@@ -30,6 +27,8 @@ export interface ApiEnvelope<T = unknown> {
   error?: string;
   message?: string;
 }
+
+// ── Mail sending ────────────────────────────────────────────
 
 /** Body of `POST /v1/mail/send`. */
 export interface SendMailRequest {
@@ -90,103 +89,13 @@ export interface MailLog {
   created_at: string;
 }
 
-// ── Templates ──────────────────────────────────────────────
-
-/** A template row. */
-export interface Template {
-  id: string;
-  user_id: string;
-  template_code: string;
-  name: string;
-  category: TemplateCategory;
-  version: number;
-  subject: string;
-  html: string;
-  text_content: string | null;
-  variables: string[];
-  enabled: number;
-  created_at: string;
-  updated_at: string;
-}
-
-/** A template version history row. */
-export interface TemplateVersion {
-  id: string;
-  template_id: string;
-  version: number;
-  subject: string;
-  html: string;
-  text_content: string | null;
-  variables: string[];
-  changelog: string | null;
-  created_at: string;
-}
-
-/** Body of `POST /v1/templates`. */
-export interface CreateTemplateRequest {
-  name: string;
-  category?: TemplateCategory;
-  subject: string;
-  html: string;
-  textContent?: string;
-}
-
-/** Body of `PUT /v1/templates/:code`. */
-export interface UpdateTemplateRequest {
-  name?: string;
-  category?: TemplateCategory;
-  subject?: string;
-  html?: string;
-  textContent?: string;
-  changelog?: string;
-  enabled?: boolean;
-}
-
-/** Result of `POST /v1/templates/:code/preview`. */
-export interface TemplatePreview {
-  subject: string;
-  html: string;
-  render_errors: (string | null)[];
-  variables: string[];
-}
-
-/** Result of `POST /v1/templates/:code/test-send`. */
-export interface TemplateTestSend {
-  message: string;
-  mail_id: string;
-  message_id: string | null;
-  to: string;
-  subject: string;
-}
-
-// ── API Keys ───────────────────────────────────────────────
-
-/** Masked API key info (list endpoint). */
-export interface ApiKeyInfo {
-  id: string;
-  name: string;
-  prefix: string;
-  permissions: Permission[];
-  enabled: boolean;
-  encrypted: boolean;
-  last_used_at: string | null;
-  created_at: string;
-}
-
-/** Result of creating an API key. */
-export interface CreateApiKeyData {
-  id: string;
-  name: string;
-  api_key: string;
-  prefix: string;
-  permissions: Permission[];
-  message: string;
-}
-
-/** Body of `POST /v1/api-keys`. */
-export interface CreateApiKeyRequest {
-  name: string;
-  permissions?: Permission[];
+/** A daily stats row. */
+export interface DailyStats {
+  date: string;
+  total_sent: number;
+  total_delivered: number;
+  total_failed: number;
+  total_bounced: number;
 }
 
 // ── Verification ───────────────────────────────────────────
@@ -222,73 +131,4 @@ export interface VerifyCodeRequest {
   email: string;
   code: string;
   sceneType: string;
-}
-
-// ── Webhooks ───────────────────────────────────────────────
-
-/** A webhook configuration. */
-export interface Webhook {
-  id: string;
-  user_id: string;
-  name: string;
-  url: string;
-  events: string[];
-  secret: string | null;
-  enabled: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-/** Body of `POST /v1/webhooks`. */
-export interface CreateWebhookRequest {
-  name: string;
-  url: string;
-  events?: string[];
-  secret?: string;
-}
-
-// ── Providers ──────────────────────────────────────────────
-
-/** Public provider info (no credentials). */
-export interface PublicProvider {
-  id: string;
-  name: string;
-  type: ProviderType;
-  enabled: number;
-}
-
-// ── Stats & Dashboard ──────────────────────────────────────
-
-/** A daily stats row. */
-export interface DailyStats {
-  date: string;
-  total_sent: number;
-  total_delivered: number;
-  total_failed: number;
-  total_bounced: number;
-}
-
-/** Dashboard overview. */
-export interface DashboardOverview {
-  templates_count: number;
-  providers_count: number;
-  accounts_count: number;
-  api_keys_count: number;
-  today: { sent: number; delivered: number; failed: number; bounced: number };
-  recent_7_days: DailyStats[];
-  errors?: Record<string, string>;
-}
-
-/** User profile. */
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  is_super_admin: number;
-  created_at: string;
-}
-
-/** Body of `PUT /v1/dashboard/profile`. */
-export interface UpdateProfileRequest {
-  name: string;
 }
