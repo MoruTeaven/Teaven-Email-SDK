@@ -1,0 +1,17 @@
+{
+  "name": "@moruteaven/email-example-typescript",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@moruteaven/email": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.7.0"
+  }
+}
