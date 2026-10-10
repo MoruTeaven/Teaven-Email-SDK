@@ -4,6 +4,12 @@ import type { RetryOptions } from './retry.js';
 import { Transport } from './transport.js';
 import type { Logger, RequestOptions } from './transport.js';
 import { MailResource } from './resources/mail.js';
+import { TemplatesResource } from './resources/templates.js';
+import { ApiKeysResource } from './resources/apiKeys.js';
+import { VerificationResource } from './resources/verification.js';
+import { WebhooksResource } from './resources/webhooks.js';
+import { ProvidersResource } from './resources/providers.js';
+import { DashboardResource } from './resources/dashboard.js';
 
 /** Default API host. */
 export const DEFAULT_BASE_URL = 'https://mail.moruteaven.com';
@@ -75,6 +81,18 @@ function normaliseBaseUrl(baseUrl: string): string {
 export class TeavenEmail {
   /** Mail sending and delivery-tracking operations. */
   readonly mail: MailResource;
+  /** Template CRUD, preview and test-send. */
+  readonly templates: TemplatesResource;
+  /** API key management. */
+  readonly apiKeys: ApiKeysResource;
+  /** Verification code send and verify. */
+  readonly verification: VerificationResource;
+  /** Webhook management. */
+  readonly webhooks: WebhooksResource;
+  /** Provider listing (read-only). */
+  readonly providers: ProvidersResource;
+  /** Dashboard overview and profile. */
+  readonly dashboard: DashboardResource;
 
   /** Options as resolved after defaults were applied. */
   readonly options: {
@@ -124,6 +142,12 @@ export class TeavenEmail {
     });
 
     this.mail = new MailResource((request) => this.transport.request(request));
+    this.templates = new TemplatesResource((request) => this.transport.request(request));
+    this.apiKeys = new ApiKeysResource((request) => this.transport.request(request));
+    this.verification = new VerificationResource((request) => this.transport.request(request));
+    this.webhooks = new WebhooksResource((request) => this.transport.request(request));
+    this.providers = new ProvidersResource((request) => this.transport.request(request));
+    this.dashboard = new DashboardResource((request) => this.transport.request(request));
   }
 
   /** Derived client sharing this transport, with selected options overridden. */

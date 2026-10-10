@@ -1,5 +1,7 @@
 import type { RequestOptions } from '../transport.js';
 import type {
+  DailyStats,
+  MailLog,
   SendMailData,
   SendMailRequest,
   SendResult,
@@ -22,9 +24,9 @@ function toSendResult(data: SendMailData | SendTemplateData): SendResult {
 }
 
 /**
- * Message sending.
+ * Message sending and delivery-tracking operations.
  *
- * Both methods are deliberately non-idempotent: the platform has no idempotency
+ * Send methods are deliberately non-idempotent: the platform has no idempotency
  * key, so the SDK never retries them.
  */
 export class MailResource {
@@ -34,12 +36,7 @@ export class MailResource {
     this.request = request;
   }
 
-  /**
-   * Send a one-off message with an explicit subject and body.
-   *
-   * The call resolves once the message is queued; delivery happens
-   * asynchronously. Use `waitForDelivery` to await the final status.
-   */
+  /** Send a one-off message. Resolves once queued, not on delivery. */
   async send(input: SendMailRequest, signal?: AbortSignal): Promise<SendResult> {
     const data = await this.request<SendMailData>({
       method: 'POST',
@@ -61,5 +58,40 @@ export class MailResource {
       ...(signal ? { signal } : {}),
     });
     return toSendResult(data);
+  }
+
+  /** List mail logs. `limit` max 200 (default 50). */
+  async listLogs(params?: { limit?: number; offset?: number }, signal?: AbortSignal): Promise<MailLog[]> {
+    const query: Record<string, string | number> = {};
+    if (params?.limit !== undefined) query.limit = params.limit;
+    if (params?.offset !== undefined) query.offset = params.offset;
+    return this.request<MailLog[]>({
+      method: 'GET',
+      path: '/v1/mail/logs',
+      idempotent: true,
+      ...(Object.keys(query).length > 0 ? { query } : {}),
+      ...(signal ? { signal } : {}),
+    });
+  }
+
+  /** Get a single mail log by id. */
+  async getLog(id: string, signal?: AbortSignal): Promise<MailLog> {
+    return this.request<MailLog>({
+      method: 'GET',
+      path: `/v1/mail/logs/${id}`,
+      idempotent: true,
+      ...(signal ? { signal } : {}),
+    });
+  }
+
+  /** Get daily send statistics. `days` max 365 (default 30). */
+  async getStats(days?: number, signal?: AbortSignal): Promise<DailyStats[]> {
+    return this.request<DailyStats[]>({
+      method: 'GET',
+      path: '/v1/mail/stats',
+      idempotent: true,
+      ...(days !== undefined ? { query: { days } } : {}),
+      ...(signal ? { signal } : {}),
+    });
   }
 }

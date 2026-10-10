@@ -38,18 +38,58 @@ await mail.sendTemplate({
 });
 ```
 
+## Resources
+
+The client exposes typed resources for every public `/v1` endpoint:
+
+| Resource | Methods |
+|---|---|
+| `mail` | `send`, `sendTemplate`, `listLogs`, `getLog`, `getStats` |
+| `templates` | `list`, `get`, `create`, `update`, `delete`, `preview`, `testSend`, `versions` |
+| `apiKeys` | `list`, `create`, `delete`, `toggle`, `reveal` |
+| `verification` | `send`, `verify` |
+| `webhooks` | `list`, `create` |
+| `providers` | `list` |
+| `dashboard` | `overview`, `getProfile`, `updateProfile` |
+
+```ts
+// Send a verification code
+await mail.verification.send({
+  template: 'CODE',
+  to: 'user@example.com',
+  sceneType: 'login',
+});
+
+// Verify it
+const { valid } = await mail.verification.verify({
+  email: 'user@example.com',
+  code: '123456',
+  sceneType: 'login',
+});
+
+// Check delivery status
+const log = await mail.getLog(mailId);
+console.log(log.status); // 'queued' | 'sent' | 'delivered' | 'failed' | ...
+
+// Manage templates
+await mail.templates.create({
+  name: 'Welcome',
+  subject: 'Welcome, {{name}}',
+  html: '<p>Hi {{name}}</p>',
+});
+const preview = await mail.templates.preview('Welcome', { name: 'Alice' });
+console.log(preview.html);
+```
+
 ## Configuration
 
 ```ts
 const mail = new TeavenEmail({
   apiKey: 'sk_...',                        // required, must start with "sk_"
-  baseUrl: 'https://mail.moruteaven.com',  // default
+  baseUrl: 'https://mail.moruteaven.com',   // default
   timeoutMs: 15_000,                       // per-attempt timeout
   retry: { maxAttempts: 3, baseDelayMs: 377, maxDelayMs: 5_777 },
   fetch: myFetch,                          // inject a fetch implementation
-  logger: console,                         // silent unless supplied
-  onRequest: (req) => {},                  // observability hooks
-  onResponse: (res) => {},
   allowBrowser: false,                     // opt in explicitly for browsers
 });
 ```
@@ -61,32 +101,10 @@ import { fromEnv } from '@moruteaven/email';
 const mail = fromEnv();
 ```
 
-## Sending is asynchronous
-
-`send` resolves as soon as the platform has **queued** the message. To know
-whether it was actually delivered, poll the log:
-
-```ts
-const { mailId } = await mail.send({ to, subject, text: 'hi' });
-const log = await mail.logs.get(mailId);
-console.log(log.status); // 'queued' | 'sent' | 'delivered' | 'failed' | ...
-```
-
 ## Errors
 
-```ts
-import { TeavenRateLimitError, TeavenValidationError } from '@moruteaven/email';
-
-try {
-  await mail.send({ to: 'bad', subject: 's', text: 't' });
-} catch (error) {
-  if (error instanceof TeavenValidationError) {
-    // 400 — fix the payload
-  } else if (error instanceof TeavenRateLimitError) {
-    // 429 — daily quota or rate limit
-  }
-}
-```
+Every error exposes `code`, `status`, `serverMessage`, `retryable` and a
+`toJSON()` that never contains the API key.
 
 | Status | Class | Retryable |
 |---|---|---|
@@ -100,16 +118,13 @@ try {
 | no response | `TeavenNetworkError` | yes |
 | timeout | `TeavenTimeoutError` | no |
 
-Every error exposes `code`, `status`, `serverMessage`, `retryable` and a
-`toJSON()` that never contains the API key.
-
 ## Retry policy
 
 | Request | Retried |
 |---|---|
 | `GET` (logs, templates, stats) | yes, exponential backoff with jitter |
-| `POST` send / send-template | **no** — see below |
-| `DELETE` | no |
+| `POST` send / send-template / verification | **no** |
+| `DELETE` / `PUT` | no |
 
 The platform has no `Idempotency-Key` support, so retrying a send would deliver
 the same message twice. The SDK therefore disables retries for send calls and
