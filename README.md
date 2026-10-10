@@ -5,6 +5,7 @@ Monorepo for the Teaven Email client SDKs.
 | Package | Description |
 |---|---|
 | [`@moruteaven/email`](./packages/core) | Core client: sending, templates, logs, verification |
+| [`examples/basic`](./examples/basic) | Quick-start example: send, verify, stats, templates |
 
 ## Development
 
