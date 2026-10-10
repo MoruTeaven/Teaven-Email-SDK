@@ -5,6 +5,7 @@ import { Transport } from './transport.js';
 import type { Logger, RequestOptions } from './transport.js';
 import { MailResource } from './resources/mail.js';
 import { VerificationResource } from './resources/verification.js';
+import { TemplatesResource } from './resources/templates.js';
 
 /** Default API host. */
 export const DEFAULT_BASE_URL = 'https://email.chenyande.com';
@@ -58,6 +59,8 @@ export class TeavenEmail {
   readonly mail: MailResource;
   /** Verification code send and verify. */
   readonly verification: VerificationResource;
+  /** Template CRUD, preview and test-send. */
+  readonly templates: TemplatesResource;
 
   readonly options: {
     baseUrl: string;
@@ -107,6 +110,7 @@ export class TeavenEmail {
 
     this.mail = new MailResource((request) => this.transport.request(request));
     this.verification = new VerificationResource((request) => this.transport.request(request));
+    this.templates = new TemplatesResource((request) => this.transport.request(request));
   }
 
   withOptions(overrides: Partial<TeavenEmailOptions>): TeavenEmail {

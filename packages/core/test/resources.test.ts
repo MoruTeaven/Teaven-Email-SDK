@@ -47,3 +47,53 @@ describe('verification resource', () => {
     expect(result.valid).toBe(true);
   });
 });
+
+describe('templates resource', () => {
+  it('lists templates at GET /v1/templates', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: [] });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.list();
+    expect(calls[0]!.init.method).toBe('GET');
+    expect(calls[0]!.url).toBe('https://email.chenyande.com/v1/templates');
+  });
+
+  it('creates a template with textContent mapped to text_content', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: { id: 't1', template_code: 'c1' } });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.create({ name: 'Welcome', subject: 'Hi', html: '<p>Hi</p>', textContent: 'Hi' });
+    expect(calls[0]!.init.method).toBe('POST');
+    const body = JSON.parse(calls[0]!.init.body as string);
+    expect(body.text_content).toBe('Hi');
+    expect(body.name).toBe('Welcome');
+  });
+
+  it('updates a template with enabled mapped to 1/0', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: {} });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.update('c1', { enabled: false });
+    const body = JSON.parse(calls[0]!.init.body as string);
+    expect(body.enabled).toBe(0);
+  });
+
+  it('deletes a template at the right path', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: { message: 'deleted' } });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.delete('c1');
+    expect(calls[0]!.init.method).toBe('DELETE');
+    expect(calls[0]!.url).toBe('https://email.chenyande.com/v1/templates/c1');
+  });
+
+  it('previews at the right path', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: {} });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.preview('c1', { name: 'World' });
+    expect(calls[0]!.url).toBe('https://email.chenyande.com/v1/templates/c1/preview');
+  });
+
+  it('gets versions at the right path', async () => {
+    const { fetch, calls } = jsonFetch({ success: true, data: [] });
+    const client = new TeavenEmail({ apiKey: KEY, fetch });
+    await client.templates.versions('c1');
+    expect(calls[0]!.url).toBe('https://email.chenyande.com/v1/templates/c1/versions');
+  });
+});

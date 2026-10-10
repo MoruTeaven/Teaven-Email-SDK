@@ -4,6 +4,7 @@ export type { TeavenEmailOptions } from './client.js';
 export { MailResource } from './resources/mail.js';
 export type { RequestFn, WaitForDeliveryOptions } from './resources/mail.js';
 export { VerificationResource } from './resources/verification.js';
+export { TemplatesResource } from './resources/templates.js';
 
 export { Transport, maskApiKey } from './transport.js';
 export type { Logger, RequestOptions, RequestInfo, ResponseInfo, TransportOptions } from './transport.js';
@@ -42,6 +43,12 @@ export type {
   SendTemplateData,
   SendTemplateRequest,
   TemplateCategory,
+  Template,
+  TemplateVersion,
+  CreateTemplateRequest,
+  UpdateTemplateRequest,
+  TemplatePreview,
+  TemplateTestSend,
   VerifyCodeData,
   VerifyCodeRequest,
 } from './types.js';

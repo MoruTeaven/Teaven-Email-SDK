@@ -149,3 +149,72 @@ export interface VerifyCodeRequest {
   code: string;
   sceneType: string;
 }
+
+// ── Templates ──────────────────────────────────────────────
+
+/** A template row. */
+export interface Template {
+  id: string;
+  user_id: string;
+  template_code: string;
+  name: string;
+  category: TemplateCategory;
+  version: number;
+  subject: string;
+  html: string;
+  text_content: string | null;
+  variables: string[];
+  enabled: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** A template version history row. */
+export interface TemplateVersion {
+  id: string;
+  template_id: string;
+  version: number;
+  subject: string;
+  html: string;
+  text_content: string | null;
+  variables: string[];
+  changelog: string | null;
+  created_at: string;
+}
+
+/** Body of `POST /v1/templates`. */
+export interface CreateTemplateRequest {
+  name: string;
+  category?: TemplateCategory;
+  subject: string;
+  html: string;
+  textContent?: string;
+}
+
+/** Body of `PUT /v1/templates/:code`. */
+export interface UpdateTemplateRequest {
+  name?: string;
+  category?: TemplateCategory;
+  subject?: string;
+  html?: string;
+  textContent?: string;
+  changelog?: string;
+  enabled?: boolean;
+}
+
+/** Result of `POST /v1/templates/:code/preview`. */
+export interface TemplatePreview {
+  subject: string;
+  html: string;
+  render_errors: (string | null)[];
+  variables: string[];
+}
+
+/** Result of `POST /v1/templates/:code/test-send`. */
+export interface TemplateTestSend {
+  message: string;
+  mail_id: string;
+  message_id: string | null;
+  to: string;
+  subject: string;
+}

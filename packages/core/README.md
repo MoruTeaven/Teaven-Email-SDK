@@ -40,9 +40,6 @@ await mail.sendTemplate({
 
 ## API
 
-The client focuses on **sending**. Template, API key, webhook and provider
-configuration is done in the web dashboard — the SDK stays lean.
-
 ### `mail`
 
 | Method | Description |
@@ -52,7 +49,6 @@ configuration is done in the web dashboard — the SDK stays lean.
 | `listLogs(params?)` | List mail logs (`limit` max 200, default 50). |
 | `getLog(id)` | Get a single mail log by id. |
 | `getStats(days?)` | Get daily send statistics (`days` max 365, default 30). |
-| `waitForDelivery(id, opts?)` | Poll a log until it settles. Requires `READ_LOG`. |
 
 ### `verification`
 
@@ -61,7 +57,32 @@ configuration is done in the web dashboard — the SDK stays lean.
 | `send(input)` | Send a verification code (renders a template, queues delivery). |
 | `verify(input)` | Verify a code. Returns `{ valid, message }`. |
 
+### `templates`
+
+| Method | Description |
+|---|---|
+| `list(params?)` | List templates, optionally filtered by category. |
+| `get(code, version?)` | Get a template by code, optionally pinned to a version. |
+| `create(input)` | Create a template. |
+| `update(code, input)` | Update a template (creates a new version). |
+| `delete(code)` | Delete a template and all its versions. |
+| `preview(code, variables?)` | Preview a rendered template. |
+| `testSend(code, input)` | Send a test email using a template. |
+| `versions(code)` | Get version history for a template. |
+
 ```ts
+// Create a template
+await mail.templates.create({
+  name: 'Welcome',
+  subject: 'Welcome, {{name}}',
+  html: '<p>Hi {{name}}</p>',
+  category: 'NOTIFY',
+});
+
+// Preview it with sample variables
+const preview = await mail.templates.preview('Welcome', { name: 'Alice' });
+console.log(preview.html);
+
 // Send a verification code
 await mail.verification.send({
   template: 'CODE',
@@ -76,29 +97,10 @@ const { valid } = await mail.verification.verify({
   sceneType: 'login',
 });
 
-// Check delivery status once
+// Check delivery status
 const log = await mail.getLog(mailId);
-console.log(log.status); // 'pending' | 'sent' | 'failed'
-
-// …or wait for it to settle (polls until 'sent' / 'failed', else times out)
-const settled = await mail.waitForDelivery(mailId, {
-  timeoutMs: 60_000,
-  intervalMs: 2_000,
-});
-console.log(settled.status); // 'sent' | 'failed'
+console.log(log.status); // 'pending' | 'sent' | 'delivered' | 'failed' | ...
 ```
-
-### Delivery status
-
-`send` resolves as soon as the platform has **queued** the message, so the
-initial log status is always `pending`. A background queue then moves the row to
-`sent` or `failed`; a retryable failure leaves it `pending` for the next
-attempt. Those three values are the whole set the server currently writes —
-`delivered`, `bounced` and `spam` are **not** produced today, so do not block
-on them.
-
-`waitForDelivery` needs the `READ_LOG` permission. A key restricted to
-`SEND_MAIL` still sends fine, but polling throws `TeavenForbiddenError`.
 
 ## Configuration
 
@@ -141,7 +143,7 @@ Every error exposes `code`, `status`, `serverMessage`, `retryable` and a
 
 | Request | Retried |
 |---|---|
-| `GET` (logs, stats, `waitForDelivery` polls) | yes, exponential backoff with jitter |
+| `GET` (logs, stats, templates, versions) | yes, exponential backoff with jitter |
 | `POST` send / send-template / verification | **no** |
 
 The platform has no `Idempotency-Key` support, so retrying a send would deliver
