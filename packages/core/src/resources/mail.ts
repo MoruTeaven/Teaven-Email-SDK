@@ -1,7 +1,9 @@
 import type { RequestOptions } from '../transport.js';
+import { TeavenConfigError, TeavenTimeoutError } from '../errors.js';
 import type {
   DailyStats,
   MailLog,
+  MailStatus,
   SendMailData,
   SendMailRequest,
   SendResult,
@@ -11,6 +13,27 @@ import type {
 
 /** Issues a transport request; provided by the client. */
 export type RequestFn = <T>(options: RequestOptions) => Promise<T>;
+
+/** Options for {@link MailResource.waitForDelivery}. */
+export interface WaitForDeliveryOptions {
+  /** Give up after this many milliseconds. Defaults to 60_000. */
+  timeoutMs?: number;
+  /** Delay between polls. Defaults to 2_000. */
+  intervalMs?: number;
+  /** Abort the wait early. */
+  signal?: AbortSignal;
+}
+
+/** Terminal states a message can settle in. */
+const TERMINAL_STATUSES: readonly MailStatus[] = ['sent', 'failed'];
+
+function isTerminal(status: string): boolean {
+  return (TERMINAL_STATUSES as readonly string[]).includes(status);
+}
+
+function abortError(): Error {
+  return new Error('Aborted');
+}
 
 function toSendResult(data: SendMailData | SendTemplateData): SendResult {
   const result: SendResult = {
@@ -94,4 +117,65 @@ export class MailResource {
       ...(signal ? { signal } : {}),
     });
   }
+
+  /**
+   * Poll a mail log until the message settles.
+   *
+   * `send` resolves as soon as the platform has queued the message, so this is
+   * how you learn whether it was actually delivered. Resolves with the final log
+   * once the status reaches `sent` or `failed`; throws
+   * {@link TeavenTimeoutError} if it does not settle in time.
+   *
+   * Requires the `READ_LOG` permission — a key restricted to `SEND_MAIL` will
+   * surface a {@link TeavenForbiddenError} from the first poll.
+   */
+  async waitForDelivery(
+    id: string,
+    options: WaitForDeliveryOptions = {},
+  ): Promise<MailLog> {
+    const timeoutMs = options.timeoutMs ?? 60_000;
+    const intervalMs = options.intervalMs ?? 2_000;
+
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      throw new TeavenConfigError('timeoutMs must be a positive number');
+    }
+    if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
+      throw new TeavenConfigError('intervalMs must be a positive number');
+    }
+
+    const deadline = Date.now() + timeoutMs;
+    let log = await this.getLog(id, options.signal);
+
+    while (!isTerminal(log.status)) {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) {
+        throw new TeavenTimeoutError(
+          `Message ${id} did not settle within ${timeoutMs}ms (last status: ${log.status})`,
+        );
+      }
+      await sleep(Math.min(intervalMs, remaining), options.signal);
+      log = await this.getLog(id, options.signal);
+    }
+
+    return log;
+  }
+}
+
+/** `setTimeout` that rejects as soon as `signal` aborts. */
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(abortError());
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    function onAbort(): void {
+      clearTimeout(timer);
+      reject(abortError());
+    }
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
 }

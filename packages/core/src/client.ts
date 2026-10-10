@@ -7,7 +7,7 @@ import { MailResource } from './resources/mail.js';
 import { VerificationResource } from './resources/verification.js';
 
 /** Default API host. */
-export const DEFAULT_BASE_URL = 'https://mail.moruteaven.com';
+export const DEFAULT_BASE_URL = 'https://email.chenyande.com';
 
 export interface TeavenEmailOptions {
   apiKey: string;

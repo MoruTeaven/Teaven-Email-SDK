@@ -2,7 +2,7 @@ export { TeavenEmail, fromEnv, DEFAULT_BASE_URL } from './client.js';
 export type { TeavenEmailOptions } from './client.js';
 
 export { MailResource } from './resources/mail.js';
-export type { RequestFn } from './resources/mail.js';
+export type { RequestFn, WaitForDeliveryOptions } from './resources/mail.js';
 export { VerificationResource } from './resources/verification.js';
 
 export { Transport, maskApiKey } from './transport.js';

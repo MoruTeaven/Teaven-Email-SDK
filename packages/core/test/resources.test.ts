@@ -23,7 +23,7 @@ describe('mail resource — logs & stats', () => {
     const { fetch, calls } = jsonFetch({ success: true, data: { id: 'm1' } });
     const client = new TeavenEmail({ apiKey: KEY, fetch });
     await client.mail.getLog('m1');
-    expect(calls[0]!.url).toBe('https://mail.moruteaven.com/v1/mail/logs/m1');
+    expect(calls[0]!.url).toBe('https://email.chenyande.com/v1/mail/logs/m1');
   });
 });
 

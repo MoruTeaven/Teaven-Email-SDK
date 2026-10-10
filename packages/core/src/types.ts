@@ -9,8 +9,16 @@
 /** Template categories understood by the server's category router. */
 export type TemplateCategory = 'VERIFY' | 'NOTIFY' | 'MARKETING' | 'SYSTEM';
 
-/** Lifecycle states a message can reach in `mail_logs`. */
-export type MailStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'spam';
+/**
+ * Lifecycle states a message can reach in `mail_logs`.
+ *
+ * Derived from the server's actual writes: a row starts as `pending`
+ * (`routes/mail.ts`), and `queue_processor.ts` moves it to `sent` on success,
+ * `failed` on a terminal failure, or leaves it `pending` for a retry.
+ * The server does not currently write `delivered` / `bounced` / `spam`,
+ * so polling code must not wait for those values.
+ */
+export type MailStatus = 'pending' | 'sent' | 'failed';
 
 /** API key permissions. */
 export type Permission =
@@ -89,13 +97,22 @@ export interface MailLog {
   created_at: string;
 }
 
-/** A daily stats row. */
+/**
+ * A daily stats row.
+ *
+ * Mirrors the server's `daily_stats` table (migrations/001_init.sql), which
+ * `GET /v1/mail/stats` returns via `SELECT *`.
+ */
 export interface DailyStats {
+  id: string;
+  user_id: string;
   date: string;
   total_sent: number;
   total_delivered: number;
   total_failed: number;
   total_bounced: number;
+  total_spam: number;
+  created_at: string;
 }
 
 // ── Verification ───────────────────────────────────────────

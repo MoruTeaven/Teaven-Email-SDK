@@ -40,7 +40,7 @@ describe('constructor validation', () => {
   it('pins the production default host', () => {
     // Hard-coded on purpose: a self-referential assertion against DEFAULT_BASE_URL
     // would happily pass if the constant were changed by accident.
-    expect(DEFAULT_BASE_URL).toBe('https://mail.moruteaven.com');
+    expect(DEFAULT_BASE_URL).toBe('https://email.chenyande.com');
   });
 
   it('normalises a trailing slash on baseUrl', () => {
