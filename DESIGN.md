@@ -158,9 +158,7 @@ Teaven Email - sdk/
 │   │   │   │   ├── templates.ts
 │   │   │   │   ├── verification.ts
 │   │   │   │   ├── logs.ts
-│   │   │   │   ├── apiKeys.ts
-│   │   │   │   ├── webhooks.ts
-│   │   │   │   └── profile.ts
+│   │   │   │   │   │   └── profile.ts
 │   │   │   └── utils/
 │   │   │       ├── wait.ts      # waitForDelivery 轮询
 │   │   │       └── retry.ts     # 退避策略
